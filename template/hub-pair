@@ -1,0 +1,20 @@
+#!/bin/sh
+# Appairage d'une VM clonée avec le Hub. À installer dans la VM modèle : /usr/local/sbin/hub-pair (root:root 0755).
+#
+# agent-hub-lxd l'exécute en root dans chaque nouvelle VM : `hub-pair <url du hub>`. Le code d'appairage à usage
+# unique est dans /run/agent-hub-lxd-pairing (tmpfs, root, 0600) ; le script le supprime quoi qu'il arrive et le
+# passe à opencode sur stdin, jamais en argument (visible dans la liste des processus).
+set -eu
+
+CODE_FILE=/run/agent-hub-lxd-pairing
+OPENCODE_USER=${OPENCODE_USER:-opencode}
+OPENCODE_BIN=${OPENCODE_BIN:-/usr/local/bin/opencode}
+
+trap 'rm -f "$CODE_FILE"' EXIT
+
+[ "$#" -eq 1 ] || { echo "usage: hub-pair <hub url>" >&2; exit 2; }
+[ -s "$CODE_FILE" ] || { echo "pairing code missing in $CODE_FILE" >&2; exit 2; }
+id "$OPENCODE_USER" >/dev/null 2>&1 || { echo "user $OPENCODE_USER missing" >&2; exit 2; }
+
+runuser -u "$OPENCODE_USER" -- "$OPENCODE_BIN" agent join "$1" < "$CODE_FILE"
+systemctl enable --now opencode-agent.service

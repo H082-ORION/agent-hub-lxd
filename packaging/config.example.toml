@@ -1,0 +1,36 @@
+# /etc/agent-hub-lxd/config.toml (root:agent-hub-lxd 0640). Toutes les clés sont facultatives ; les valeurs
+# ci-dessous sont les valeurs par défaut. Une clé inconnue est une erreur, pour attraper les fautes de frappe.
+
+# Nom de l'hôte sur le Hub (défaut : nom de la machine).
+# name = "lxd-paris-1"
+
+# Intervalle d'envoi des métriques au Hub, en secondes (5 minimum).
+metrics_interval_secs = 15
+
+[lxd]
+# socket = "/var/snap/lxd/common/lxd/unix.socket"   # défaut : socket du snap, puis /var/lib/lxd/unix.socket
+project = "hub"                    # projet LXD dédié : la VM modèle et toutes les instances
+template = "opencode-template"     # VM modèle, arrêtée, dans ce projet
+# template_snapshot = "base"       # cloner ce snapshot plutôt que l'état courant du modèle
+storage_pool = "default"           # pool des disques racine
+pair_command = ["/usr/local/sbin/hub-pair"]   # exécuté en root dans la VM, suivi de l'URL du Hub
+boot_timeout_secs = 180            # délai max pour que l'agent LXD de la VM réponde
+pair_timeout_secs = 120            # délai max de la commande d'appairage
+
+[limits]
+max_instances = 10
+
+[limits.max]                       # maximum par instance
+cpu = 8
+memory_mib = 16384
+disk_gib = 100
+
+[limits.default]                   # quand le Hub ne précise pas
+cpu = 2
+memory_mib = 4096
+disk_gib = 20
+
+[reserve]                          # jamais donné aux instances (hôte, modèle, autres projets)
+cpu = 1
+memory_mib = 2048
+disk_gib = 20

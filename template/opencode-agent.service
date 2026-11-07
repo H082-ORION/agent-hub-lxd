@@ -1,0 +1,15 @@
+# Dans la VM modèle : /etc/systemd/system/opencode-agent.service, installé mais NON activé.
+# hub-pair l'active une fois la VM appairée.
+[Unit]
+Description=opencode-hub machine agent
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=opencode
+ExecStart=/usr/local/bin/opencode agent run
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

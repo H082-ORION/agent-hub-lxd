@@ -1,0 +1,48 @@
+[Unit]
+Description=agent-hub-lxd: opencode-hub cloud instances on LXD
+Documentation=https://github.com/h082-orion/agent-hub-lxd
+After=network-online.target snap.lxd.daemon.service lxd.service
+Wants=network-online.target
+
+[Service]
+# A dedicated user in the lxd group: LXD access is root-equivalent on the host anyway, but the process itself gets
+# no other privilege and no access to the rest of the file system.
+User=agent-hub-lxd
+Group=agent-hub-lxd
+SupplementaryGroups=lxd
+ExecStart=/usr/local/bin/agent-hub-lxd run
+Restart=on-failure
+RestartSec=5
+# 78: revoked token, protocol mismatch or invalid configuration; restarting cannot fix it.
+RestartPreventExitStatus=78
+
+StateDirectory=agent-hub-lxd
+StateDirectoryMode=0700
+UMask=0077
+
+NoNewPrivileges=yes
+CapabilityBoundingSet=
+AmbientCapabilities=
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+ProtectProc=invisible
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallFilter=~@privileged @resources
+
+[Install]
+WantedBy=multi-user.target

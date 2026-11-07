@@ -1,7 +1,17 @@
 # agent-hub-lxd
 
+[![CI](https://github.com/h082-orion/agent-hub-lxd/actions/workflows/ci.yml/badge.svg)](https://github.com/h082-orion/agent-hub-lxd/actions/workflows/ci.yml)
+
 Agent d'hôte LXD pour [opencode-hub](https://github.com/h082-orion/opencode-hub) : il crée les **instances Cloud**
 du Hub sous forme de VM LXD.
+
+> [!WARNING]
+> **Projet expérimental.** L'agent n'a pas encore été éprouvé sur un vrai serveur LXD ni en production. Le
+> protocole, la configuration et le comportement peuvent changer sans préavis.
+
+> [!NOTE]
+> Ce projet est indépendant. Il n'est **ni lié, ni affilié, ni soutenu** par l'équipe officielle
+> d'[OpenCode](https://github.com/anomalyco/opencode).
 
 ```
 Hub ◄── WebSocket sortant ── agent-hub-lxd (serveur Ubuntu, même derrière NAT)
@@ -108,6 +118,10 @@ journalctl -u agent-hub-lxd -f
 ## Développement
 
 ```bash
-cargo test
+cargo fmt --check
 cargo clippy --all-targets
+cargo test
 ```
+
+La CI GitHub Actions (`.github/workflows/ci.yml`) lance ces vérifications et un build release à chaque push sur
+`main` et sur chaque pull request. Le binaire Linux x86_64 est disponible en artefact du workflow.

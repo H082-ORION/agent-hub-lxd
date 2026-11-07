@@ -29,9 +29,40 @@ Hub ◄── WebSocket sortant ── agent-hub-lxd (serveur Ubuntu, même derr
 L'agent remonte en continu la capacité de l'hôte et les métriques des instances. Protocole complet :
 [`docs/protocol.md`](docs/protocol.md).
 
-## Installation sur l'hôte
+## Installation rapide
 
-Prérequis : Ubuntu avec LXD (snap) et la virtualisation matérielle (`lxc info | grep -i virtual`).
+Sur un serveur Ubuntu avec la virtualisation matérielle (`/dev/kvm`), depuis une copie de ce dépôt :
+
+```bash
+sudo ./install.sh
+```
+
+L'installateur a la même interface que celui d'opencode-hub : même bannière, langue au lancement, menus à cocher et
+récapitulatif avant toute modification. Il propose trois composants :
+
+- **LXD** : il l'installe par snap s'il n'est pas déjà présent, puis l'initialise (stockage zfs ou dir) s'il ne l'est
+  pas. Il crée le projet dédié, le profil, et en option le réseau isolé `hubbr0`.
+- **VM modèle** : il crée `opencode-template` à partir d'`ubuntu:24.04` et y installe le binaire opencode-hub, `hub-pair`
+  et le service `opencode-agent` (non activé). Il efface ensuite l'identité de la VM (machine-id, clés SSH, journaux,
+  cloud-init) puis l'arrête. Le binaire opencode-hub se construit avec le `./build.sh` d'opencode-hub.
+- **Agent** : il installe le binaire (déjà présent, construit avec cargo ou donné par son chemin), puis crée
+  l'utilisateur `agent-hub-lxd` et la configuration. Il enrôle le serveur avec le code de **Cloud servers → Link
+  server** du hub, demandé sans affichage, puis installe le service systemd.
+
+```bash
+sudo ./install.sh --lxd --template --opencode-binary /usr/local/bin/opencode
+sudo ./install.sh --agent --hub-url https://hub.exemple.fr --service    # code demandé sans affichage
+./install.sh --status
+sudo ./install.sh --uninstall --agent --purge
+```
+
+Le script peut être relancé sans risque : il garde ce qui est déjà en place (LXD, projet, modèle, enrôlement) et
+redemande avant de recréer le modèle ou de réenrôler le serveur. `./install.sh --help` liste toutes les options.
+
+## Installation manuelle
+
+Ce que fait l'installateur, étape par étape. Prérequis : Ubuntu avec LXD (snap) et la virtualisation matérielle
+(`lxc info | grep -i virtual`).
 
 ```bash
 cargo build --release

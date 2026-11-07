@@ -28,6 +28,8 @@ jobs:
         with:
           components: rustfmt, clippy
       - uses: Swatinem/rust-cache@v2
+      - name: Check the installer
+        run: bash -n install.sh template/hub-pair && shellcheck -S warning install.sh template/hub-pair
       - run: cargo fmt --check
       - run: cargo clippy --all-targets --locked
       - run: cargo test --locked
